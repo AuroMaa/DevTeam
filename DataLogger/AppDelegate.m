@@ -16,7 +16,7 @@
 @import UserNotifications;
 
 
-@interface AppDelegate ()<CLLocationManagerDelegate,DataLoggerLocationDelegate,UNUserNotificationCenterDelegate> {
+@interface AppDelegate ()<CLLocationManagerDelegate,DataLoggerLocationDelegate,UNUserNotificationCenterDelegate,ARSessionDelegate> {
     CLLocationManager *locationMgr;
     DataLoggerLocationServices *locationServices;
     
@@ -84,6 +84,85 @@
     [Fabric with:@[[Crashlytics class]]];
     return YES;
 }
+-(void)initialiseAR
+{
+    if (@available(iOS 11.3, *)) {
+        _sceneView = [[ARSCNView alloc]initWithFrame:CGRectMake(260, 200, 100, 120)];
+        NSTimeInterval timeStamp = [[NSDate date] timeIntervalSince1970];
+        NSString *intervalString = [NSString stringWithFormat:@"%f", timeStamp * 1000];
+        if ([intervalString length] > 0)
+        {
+            _arInitailiseTime = [NSString stringWithFormat:@"%@", [NSNumber numberWithDouble:round(timeStamp * 1000)]];
+        }        
+        
+        ARWorldTrackingConfiguration *configuration = [[ARWorldTrackingConfiguration alloc]init];
+        configuration.planeDetection = ARPlaneDetectionHorizontal;
+        [[_sceneView session] runWithConfiguration:configuration];
+        [[_sceneView session] setDelegate:self];
+        [[UIApplication sharedApplication] setIdleTimerDisabled:YES];
+        [_sceneView setShowsStatistics:YES];
+        [self.window addSubview:_sceneView];
+        
+    } else {
+        // Fallback on earlier versions
+    }
+    
+}
+-(void)session:(ARSession *)session didUpdateFrame:(ARFrame *)frame
+API_AVAILABLE(ios(11.0)){
+    if (_isstartTest && [[NSUserDefaults standardUserDefaults] boolForKey:@"EnableARKit"])
+    {
+        SCNVector3 cameraPosition = SCNVector3Make(frame.camera.transform.columns[3].x, frame.camera.transform.columns[3].y, frame.camera.transform.columns[3].z);
+        NSTimeInterval timeStamp = [[NSDate date] timeIntervalSince1970];
+        NSString *intervalString = [NSString stringWithFormat:@"%f", timeStamp * 1000];
+        
+        _dictCameraPosition = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithFloat:cameraPosition.x],@"x",[NSNumber numberWithFloat:cameraPosition.y],@"y",[NSNumber numberWithFloat:cameraPosition.z],@"z",[intervalString length] > 0 ? [NSNumber numberWithDouble:round(timeStamp * 1000)] : [NSNumber numberWithDouble:0.0],@"current_time",[NSNumber numberWithInteger:[_arInitailiseTime integerValue]],@"start_time",nil];
+        _sceneView.hidden = NO;
+        
+    }
+    else
+    {
+        _sceneView.hidden = YES;
+        
+    }
+    
+}
+
+-(void)session:(ARSession *)session didFailWithError:(NSError *)error
+API_AVAILABLE(ios(11.0)){
+    if (@available(iOS 11.3, *)) {
+        if (![error isKindOfClass:[ARErrorDomain class]])
+        {
+            return;
+        }
+        NSError *errorWithInfo = (NSError*)error;
+        NSArray *messages = [NSArray arrayWithObjects:errorWithInfo.localizedDescription,errorWithInfo.localizedFailureReason,errorWithInfo.localizedRecoverySuggestion, nil];
+        
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error!" message:[NSString stringWithFormat:@"%@\n%@\n%@",messages[0],messages[1],messages[2]] preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertAction* defaultAction = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault
+                                                              handler:^(UIAlertAction * action) {}];
+        
+        [alert addAction:defaultAction];
+        [self.window.rootViewController presentViewController:alert animated:YES completion:nil];
+        
+    }
+}
+-(void)sessionInterruptionEnded:(ARSession *)session
+API_AVAILABLE(ios(11.0)){
+    [self resetTracking];
+}
+-(void)resetTracking
+{
+    if (@available(iOS 11.0, *)) {
+        ARWorldTrackingConfiguration *configuration = [[ARWorldTrackingConfiguration alloc]init];
+        configuration.planeDetection = ARPlaneDetectionHorizontal;
+        [[_sceneView session] runWithConfiguration:configuration];
+    } else {
+        // Fallback on earlier versions
+    }
+    
+}
+
 
 - (void)pushRegistry:(PKPushRegistry *)registry didUpdatePushCredentials:(PKPushCredentials *)credentials forType:(NSString *)type{
     if([credentials.token length] == 0) {
@@ -196,7 +275,9 @@
 {
     NSString *token = [[deviceToken description] stringByTrimmingCharactersInSet: [NSCharacterSet characterSetWithCharactersInString:@"<>"]];
     token = [token stringByReplacingOccurrencesOfString:@" " withString:@""];
-    NSLog(@"content---%@", token);
+    _deviceToken = token;
+
+    NSLog(@"content---%@",token );
 }
 - (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
     NSLog(@"Error---%@", error);

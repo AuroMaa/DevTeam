@@ -12,8 +12,6 @@
 		72146A1521ADE97600A8DDD3 /* SensorViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 72146A1421ADE97600A8DDD3 /* SensorViewController.m */; };
 		723319AF21A36E2F000312E3 /* MapViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 723319AE21A36E2F000312E3 /* MapViewController.m */; };
 		72AA89EC21A5091B00B5947F /* RequestViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 72AA89EB21A5091B00B5947F /* RequestViewController.m */; };
-		A7DB46E121DE019100AC5382 /* LogFilesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = A7DB46E021DE019100AC5382 /* LogFilesViewController.m */; };
-		A7DB46E421DE04C600AC5382 /* LogFileTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = A7DB46E321DE04C600AC5382 /* LogFileTableViewCell.m */; };
 		C21A2FC5211193AD00D18470 /* DataLoggerManager.m in Sources */ = {isa = PBXBuildFile; fileRef = C21A2FC4211193AD00D18470 /* DataLoggerManager.m */; };
 		C21F094D20FF118B00BA9601 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = C21F094C20FF118B00BA9601 /* AppDelegate.m */; };
 		C21F095020FF118B00BA9601 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C21F094F20FF118B00BA9601 /* ViewController.m */; };
@@ -85,10 +83,6 @@
 		723319AE21A36E2F000312E3 /* MapViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MapViewController.m; sourceTree = "<group>"; };
 		72AA89EA21A5091B00B5947F /* RequestViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RequestViewController.h; sourceTree = "<group>"; };
 		72AA89EB21A5091B00B5947F /* RequestViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RequestViewController.m; sourceTree = "<group>"; };
-		A7DB46DF21DE019100AC5382 /* LogFilesViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LogFilesViewController.h; sourceTree = "<group>"; };
-		A7DB46E021DE019100AC5382 /* LogFilesViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LogFilesViewController.m; sourceTree = "<group>"; };
-		A7DB46E221DE04C600AC5382 /* LogFileTableViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LogFileTableViewCell.h; sourceTree = "<group>"; };
-		A7DB46E321DE04C600AC5382 /* LogFileTableViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LogFileTableViewCell.m; sourceTree = "<group>"; };
 		C21A2FC3211193AD00D18470 /* DataLoggerManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DataLoggerManager.h; sourceTree = "<group>"; };
 		C21A2FC4211193AD00D18470 /* DataLoggerManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DataLoggerManager.m; sourceTree = "<group>"; };
 		C21F094820FF118B00BA9601 /* DataLogger.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DataLogger.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -366,10 +360,6 @@
 				720EF85A21A91481004DE867 /* ResponseViewController.m */,
 				72146A1321ADE97600A8DDD3 /* SensorViewController.h */,
 				72146A1421ADE97600A8DDD3 /* SensorViewController.m */,
-				A7DB46DF21DE019100AC5382 /* LogFilesViewController.h */,
-				A7DB46E021DE019100AC5382 /* LogFilesViewController.m */,
-				A7DB46E221DE04C600AC5382 /* LogFileTableViewCell.h */,
-				A7DB46E321DE04C600AC5382 /* LogFileTableViewCell.m */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -552,7 +542,6 @@
 				C21F098A210078F300BA9601 /* ConnectionManager.m in Sources */,
 				72146A1521ADE97600A8DDD3 /* SensorViewController.m in Sources */,
 				C2779B162105FB58005FC787 /* CommonTableViewCell.m in Sources */,
-				A7DB46E121DE019100AC5382 /* LogFilesViewController.m in Sources */,
 				72AA89EC21A5091B00B5947F /* RequestViewController.m in Sources */,
 				C21F099E2100990700BA9601 /* JSONKeyMapper.m in Sources */,
 				C21F09932100966500BA9601 /* HeartBeatRemoteConfig.m in Sources */,
@@ -566,7 +555,6 @@
 				C2A4AAD02105C28200EEAE3D /* CheckBoxTableViewCell.m in Sources */,
 				C21F099F2100990700BA9601 /* JSONValueTransformer.m in Sources */,
 				C2996A12210F316900A95692 /* DLUploadTestResultsData.m in Sources */,
-				A7DB46E421DE04C600AC5382 /* LogFileTableViewCell.m in Sources */,
 				C21F09A62100A94A00BA9601 /* SettingsViewController.m in Sources */,
 				C2A4AACB2105C0B900EEAE3D /* SettingsTableViewCell.m in Sources */,
 				C233F6772126ABC3001CB392 /* FDKeychain.m in Sources */,

@@ -9,6 +9,7 @@
 #import "SensorViewController.h"
 #import "DLBarometerData.h"
 #import <CoreMotion/CoreMotion.h>
+#import "AppDelegate.h"
 
 @interface SensorViewController ()<UIAccelerometerDelegate>
 {
@@ -34,6 +35,21 @@
      selector:@selector(reloadBarometer:)
      name:@"Barometer"
      object:nil];
+    [[NSNotificationCenter defaultCenter]
+     addObserver:self
+     selector:@selector(updateArPosition)
+     name:@"ArKitValues"
+     object:nil];
+
+}
+-(void)updateArPosition
+{
+    AppDelegate *appDelegate = (AppDelegate*)[[UIApplication sharedApplication] delegate];
+    
+    _lblArKitXPos.text = [NSString stringWithFormat:@"%f",[[appDelegate.dictCameraPosition valueForKey:@"x"] floatValue]];
+    _lblArKitYPos.text = [NSString stringWithFormat:@"%f",[[appDelegate.dictCameraPosition valueForKey:@"y"] floatValue]];
+    _lblArKitZPos.text = [NSString stringWithFormat:@"%f",[[appDelegate.dictCameraPosition valueForKey:@"z"] floatValue]];
+    NSLog(@"Sensor ArKit Values : %@ ",appDelegate.dictCameraPosition);
 }
 -(void)viewWillAppear:(BOOL)animated
 {

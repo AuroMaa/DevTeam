@@ -28,7 +28,6 @@
 #import "MBProgressHUD.h"
 #import "MapViewController.h"
 #import <CoreMotion/CoreMotion.h>
-#import <ARKit/ARKit.h>
 
 
 static NSString * const KeychainItem_Service = @"DataLogger";
@@ -81,7 +80,6 @@ API_AVAILABLE(ios(11.0))
     NSDictionary *dictCameraPosition;
     NSString *arInitailiseTime;
 }
-@property (weak, nonatomic) IBOutlet ARSCNView *sceneView;
 @property (weak, nonatomic) IBOutlet UIButton *btnMap;
 
 @property (nonatomic) NSUInteger interval;
@@ -155,48 +153,6 @@ API_AVAILABLE(ios(11.0))
     //    [self callHeartBeatAPI];
     self.btnMap.enabled = NO;
 }
--(void)viewWillDisappear:(BOOL)animated
-{
-    [super viewWillDisappear:animated];
-    [[_sceneView session] pause];
-    
-}
-
--(void)sessionInterruptionEnded:(ARSession *)session
-API_AVAILABLE(ios(11.0)){
-    [self resetTracking];
-}
--(void)session:(ARSession *)session didFailWithError:(NSError *)error
-API_AVAILABLE(ios(11.0)){
-    if (@available(iOS 11.3, *)) {
-        if (![error isKindOfClass:[ARErrorDomain class]])
-        {
-            return;
-        }
-        NSError *errorWithInfo = (NSError*)error;
-        NSArray *messages = [NSArray arrayWithObjects:errorWithInfo.localizedDescription,errorWithInfo.localizedFailureReason,errorWithInfo.localizedRecoverySuggestion, nil];
-        
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error!" message:[NSString stringWithFormat:@"%@\n%@\n%@",messages[0],messages[1],messages[2]] preferredStyle:UIAlertControllerStyleAlert];
-        UIAlertAction* defaultAction = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault
-                                                              handler:^(UIAlertAction * action) {}];
-        
-        [alert addAction:defaultAction];
-        [self presentViewController:alert animated:YES completion:nil];
-        
-    }
-}
--(void)resetTracking
-{
-    if (@available(iOS 11.0, *)) {
-        ARWorldTrackingConfiguration *configuration = [[ARWorldTrackingConfiguration alloc]init];
-        configuration.planeDetection = ARPlaneDetectionHorizontal;
-        [[_sceneView session] runWithConfiguration:configuration];
-    } else {
-        // Fallback on earlier versions
-    }
-    
-}
-
 - (void)reloadClicked
 {
     isRelaodClicked=YES;
@@ -226,9 +182,9 @@ API_AVAILABLE(ios(11.0)){
                                     style:UIBarButtonItemStylePlain
                                     target:self
                                     action:@selector(aboutPage)];
-    self.navigationItem.leftBarButtonItem = aboutButton;
+//    self.navigationItem.leftBarButtonItem = aboutButton;
     self.navigationController.navigationBar.topItem.rightBarButtonItem = settingsButton;
-    self.navigationController.navigationBar.topItem.leftBarButtonItem = aboutButton;
+//    self.navigationController.navigationBar.topItem.leftBarButtonItem = aboutButton;
 
     
 }
@@ -472,7 +428,8 @@ API_AVAILABLE(ios(11.0)){
 
 - (IBAction)startTests:(UIButton *)sender {
     _lblTotal.text = [NSString stringWithFormat:@"Total : %@",self->_noOfTestTxtFld.text];
-    
+    AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
+
     BOOL checkLocationServices = [sharedlocationServices checkLocationStatus];
     if (!checkLocationServices) {
         [FunctionUtil showAlertViewWithTitle:@"Location Services" andMessage:@"Please Enable Location Services." FromVc:self];
@@ -481,6 +438,7 @@ API_AVAILABLE(ios(11.0)){
     if (sender.isSelected) {
         sender.selected=NO;
         isstartTest = NO;
+        appDelegate.isstartTest = NO;
         if (isAutomatedTestStarted&&!isAutoReportTestStarted) {
             [sender setTitle:@"START TESTS" forState:UIControlStateNormal];
             if (isAutomatedTestStarted) {
@@ -496,8 +454,10 @@ API_AVAILABLE(ios(11.0)){
         }
 
     } else {
-        _sceneView.hidden = NO;
-        isstartTest = YES;        
+
+        appDelegate.sceneView.hidden = NO;
+        isstartTest = YES;
+        appDelegate.isstartTest = YES;
         [sender setTitle:@"STOP TESTS" forState:UIControlStateNormal];
         sender.selected=YES;
         if (sharedlocationServices.isAutoReportTestStarted) {
@@ -522,79 +482,26 @@ API_AVAILABLE(ios(11.0)){
             [sender setTitle:@"START TESTS" forState:UIControlStateNormal];
         }
         [FunctionUtil showAlertViewWithTitle:@"Alert" andMessage:@"All fields are Mandatory, please input the missing fields." FromVc:self];
-        
     }
-    [self initialiseAR];
+    [appDelegate initialiseAR];
+    
     _arDataArray = [[NSMutableArray alloc]init];
     arTimer = [NSTimer scheduledTimerWithTimeInterval:[self->heartBeatModel.Vo_update_rate_in_ms intValue]/1000 repeats:true block:^(NSTimer * _Nonnull timer) {
 //        NSLog(@"Artime : %@",[NSDate date]);
-        if (self->dictCameraPosition != nil)
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSNotification *myNotification = [NSNotification notificationWithName:@"ArKitValues"
+                                                                           object:self
+                                                                         userInfo:nil];
+            
+            [[NSNotificationCenter defaultCenter] postNotification:myNotification];
+            
+        });
+
+        if (appDelegate.dictCameraPosition != nil)
         {
-            [self->_arDataArray addObject:self->dictCameraPosition];
+            [self->_arDataArray addObject:appDelegate.dictCameraPosition];
         }
     }];
-    
-}
--(void)viewDidAppear:(BOOL)animated
-{
-    [super viewDidAppear:animated];
-    if (isstartTest == YES)
-    {
-        [self initialiseAR];
-        _arDataArray = [[NSMutableArray alloc]init];
-        arTimer = [NSTimer scheduledTimerWithTimeInterval:[self->heartBeatModel.Vo_update_rate_in_ms intValue]/1000 repeats:true block:^(NSTimer * _Nonnull timer) {
-            //        NSLog(@"Artime : %@",[NSDate date]);
-            if (self->dictCameraPosition != nil)
-            {
-                [self->_arDataArray addObject:self->dictCameraPosition];
-            }
-        }];
-
-    }
-    
-}
--(void)initialiseAR
-{
-    if (@available(iOS 11.3, *)) {
-        NSTimeInterval timeStamp = [[NSDate date] timeIntervalSince1970];
-        NSString *intervalString = [NSString stringWithFormat:@"%f", timeStamp * 1000];
-        if ([intervalString length] > 0)
-        {
-            arInitailiseTime = [NSString stringWithFormat:@"%@", [NSNumber numberWithDouble:round(timeStamp * 1000)]];
-        }
-
-
-        ARWorldTrackingConfiguration *configuration = [[ARWorldTrackingConfiguration alloc]init];
-        configuration.planeDetection = ARPlaneDetectionHorizontal;
-        [[_sceneView session] runWithConfiguration:configuration];
-        [[_sceneView session] setDelegate:self];
-        [[UIApplication sharedApplication] setIdleTimerDisabled:YES];
-        [_sceneView setShowsStatistics:YES];
-//        [_sceneView removeFromSuperview];
-//        [self.view.window addSubview:_sceneView];
-        
-    } else {
-        // Fallback on earlier versions
-    }
-    
-}
--(void)session:(ARSession *)session didUpdateFrame:(ARFrame *)frame
-API_AVAILABLE(ios(11.0)){
-    if (isstartTest && [defaults boolForKey:@"EnableARKit"])
-    {
-        SCNVector3 cameraPosition = SCNVector3Make(frame.camera.transform.columns[3].x, frame.camera.transform.columns[3].y, frame.camera.transform.columns[3].z);
-        NSTimeInterval timeStamp = [[NSDate date] timeIntervalSince1970];
-        NSString *intervalString = [NSString stringWithFormat:@"%f", timeStamp * 1000];
-
-        dictCameraPosition = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithFloat:cameraPosition.x],@"x",[NSNumber numberWithFloat:cameraPosition.y],@"y",[NSNumber numberWithFloat:cameraPosition.z],@"z",[intervalString length] > 0 ? [NSNumber numberWithDouble:round(timeStamp * 1000)] : [NSNumber numberWithDouble:0.0],@"current_time",[NSNumber numberWithInteger:[arInitailiseTime integerValue]],@"start_time",nil];
-        _sceneView.hidden = NO;
-        
-    }
-    else
-    {
-        _sceneView.hidden = YES;
-        
-    }
     
 }
 
@@ -795,9 +702,6 @@ API_AVAILABLE(ios(11.0)){
         
         [dict addEntriesFromDictionary:_uploadbaroDataDict];
         [dict addEntriesFromDictionary:_uploadLocationdict];
-        
-        NSArray *arrTemp = [_uploadbaroDataDict valueForKey:@"barometer"];
-        NSLog(@"Barometer count is %lu",(unsigned long)arrTemp.count);
         if ([[NSUserDefaults standardUserDefaults] boolForKey:@"EnableARKit"] == YES)
         {
             NSDictionary *arKitjsonDict = [NSDictionary dictionaryWithObjectsAndKeys:self.arDataArray,@"Arkit", nil];
@@ -1247,23 +1151,13 @@ API_AVAILABLE(ios(11.0)){
             NSString *intervalString = [NSString stringWithFormat:@"%f", timeStamp * 1000];
 
             NSDictionary * newdataSetInfo = [NSDictionary dictionaryWithObjectsAndKeys:hpaUnitVal,@"pressure",barometerReadings.relativeAltitude,@"altitude",[intervalString length] > 0 ? [NSNumber numberWithDouble:round(timeStamp * 1000)] : [NSNumber numberWithDouble:0.0],@"time", nil];
-            if (isAutoReportTestStarted)
-            {
-                if (self.baroDataArray.count <= 10) {
-                    [self.baroDataArray addObject:newdataSetInfo];
-                    NSDictionary *barojsonDict = [NSDictionary dictionaryWithObjectsAndKeys:self.baroDataArray,@"barometer", nil];
-                    self.uploadbaroDataDict = [NSDictionary dictionaryWithDictionary:barojsonDict];
-                }
-                else {
-                    BaroDataSetsCollected = YES;
-                }
-            }
-            else
-            {
+            if (self.baroDataArray.count <= 10) {
                 [self.baroDataArray addObject:newdataSetInfo];
                 NSDictionary *barojsonDict = [NSDictionary dictionaryWithObjectsAndKeys:self.baroDataArray,@"barometer", nil];
                 self.uploadbaroDataDict = [NSDictionary dictionaryWithDictionary:barojsonDict];
-
+            }
+            else {
+                BaroDataSetsCollected = YES;
             }
         }
     }

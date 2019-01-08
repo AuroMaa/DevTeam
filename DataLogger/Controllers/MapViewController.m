@@ -204,15 +204,23 @@ static int const ZOOM_LEVEL = 800;
         {
             arrResponse = [NSMutableArray arrayWithArray:[[NSUserDefaults standardUserDefaults] valueForKey:@"arrGroundTruth"]];
         }
-        NSTimeInterval timeStamp = [[NSDate date] timeIntervalSince1970];
-        NSString *intervalString = [NSString stringWithFormat:@"%f", timeStamp];
-        
+    NSTimeInterval timeStamp = [[NSDate date] timeIntervalSince1970];
+    NSString *intervalString = [NSString stringWithFormat:@"%f", timeStamp * 1000];
+
         [dictGT setObject:_txtFldElevation.text forKey:@"elevation"];
         [dictGT setObject:_txtFldFloorNo.text forKey:@"floor"];
         [dictGT setObject:[NSString stringWithFormat:@"%f",_mapView.centerCoordinate.latitude] forKey:@"latitude"];
         [dictGT setObject:[NSString stringWithFormat:@"%f",_mapView.centerCoordinate.longitude] forKey:@"longitude"];
         [dictGT setObject:mapSpan forKey:@"mapZoomSpan"];
         [dictGT setObject:@"user_marker" forKey:@"source"];
+        AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
+        NSMutableDictionary *dictArKit = [[NSMutableDictionary alloc]initWithDictionary:    appDelegate.dictCameraPosition];
+        if ([intervalString length] > 0)
+        {
+            [dictArKit setValue:[NSNumber numberWithDouble:round(timeStamp * 1000)] forKey:@"current_time"];
+        }
+
+        [dictGT setObject:dictArKit forKey:@"ARKit"];
         if (timeElevInput == nil || [timeElevInput isEqualToString:@""])
         {
             timeElevInput = intervalString;
@@ -225,10 +233,13 @@ static int const ZOOM_LEVEL = 800;
         {
             timeMapPan = intervalString;
         }
-        [dictGT setObject:timeElevInput forKey:@"timeElevInput"];
-        [dictGT setObject:timeFloorInput forKey:@"timeFloorInput"];
-        [dictGT setObject:timeMapPan forKey:@"timeMapPan"];
-        [dictGT setObject:intervalString forKey:@"timeStamp"];
+        [dictGT setObject:[NSNumber numberWithDouble:round([timeElevInput doubleValue] )] forKey:@"timeElevInput"];
+        [dictGT setObject:[NSNumber numberWithDouble:round([timeFloorInput doubleValue] )] forKey:@"timeFloorInput"];
+        [dictGT setObject:[NSNumber numberWithDouble:round([timeMapPan doubleValue] )] forKey:@"timeMapPan"];
+        if ([intervalString length] > 0)
+        {
+            [dictGT setObject:[NSNumber numberWithDouble:round(timeStamp * 1000)] forKey:@"timeStamp"];
+        }
         [arrResponse addObject:dictGT];
         
         [[NSUserDefaults standardUserDefaults] setObject:arrResponse forKey:@"arrGroundTruth"];
@@ -260,7 +271,7 @@ static int const ZOOM_LEVEL = 800;
 
     mapSpan = [NSString stringWithFormat:@"%d", metersLongitude];
     NSTimeInterval timeStamp = [[NSDate date] timeIntervalSince1970];
-    timeMapPan = [NSString stringWithFormat:@"%f", timeStamp];
+    timeMapPan = [NSString stringWithFormat:@"%f", timeStamp * 1000];
 }
 
 - (IBAction)btnPFLPClicked:(UIButton *)sender {
@@ -341,13 +352,14 @@ static int const ZOOM_LEVEL = 800;
     if (textField == _txtFldElevation)
     {
         NSTimeInterval timeStamp = [[NSDate date] timeIntervalSince1970];
-        timeElevInput = [NSString stringWithFormat:@"%f", timeStamp];
+
+        timeElevInput = [NSString stringWithFormat:@"%f", timeStamp * 1000];
         
     }
     if (textField == _txtFldFloorNo)
     {
         NSTimeInterval timeStamp = [[NSDate date] timeIntervalSince1970];
-        timeFloorInput = [NSString stringWithFormat:@"%f", timeStamp];
+        timeFloorInput = [NSString stringWithFormat:@"%f", timeStamp * 1000];
     }
     return YES;
 }

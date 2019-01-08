@@ -11,6 +11,13 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface SensorViewController : UIViewController
+
+
+
+@property (weak, nonatomic) IBOutlet UILabel *lblArKitXPos;
+@property (weak, nonatomic) IBOutlet UILabel *lblArKitYPos;
+@property (weak, nonatomic) IBOutlet UILabel *lblArKitZPos;
+
 @property (weak, nonatomic) IBOutlet UILabel *lblPressure;
 @property (weak, nonatomic) IBOutlet UILabel *lblAccX;
 @property (weak, nonatomic) IBOutlet UILabel *lblAccY;
