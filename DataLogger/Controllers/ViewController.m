@@ -295,17 +295,18 @@ API_AVAILABLE(ios(11.0))
     AppDelegate *appDelegate = (AppDelegate*)[[UIApplication sharedApplication] delegate];
     pushDeviceToken = appDelegate.deviceToken;  //..to read
     NSString *ulrString;
+    //http://demo-d1.polariswireless.com/HeartBeatAndRemoteConfig.php?HeartBeatVer=3&os=iOS&config_id=<config_id>&uuid=<uuid>&imei=<imei>&imsi=<imsi>&devicetoken=<deviceToken>
     if (!(updatedremoteConfigTestUrl.length == 0)) {
         if (!(updatedconfigID.length == 0)) {
-            ulrString = [NSString stringWithFormat:@"%@HeartBeatVer=%d&config_id=%@&uuid=%@&devicetoken=%@",updatedremoteConfigTestUrl,1,updatedconfigID,uuidIMEI,pushDeviceToken];
+            ulrString = [NSString stringWithFormat:@"%@HeartBeatVer=%d&config_id=%@&uuid=%@&devicetoken=%@&os=iOS&imei=%@&imsi=%@",updatedremoteConfigTestUrl,3,updatedconfigID,uuidIMEI,pushDeviceToken,imei,subscriberID];
         } else {
-            ulrString = [NSString stringWithFormat:@"%@HeartBeatVer=%d&config_id=%d&uuid=%@&devicetoken=%@",updatedremoteConfigTestUrl,1,11,uuidIMEI,pushDeviceToken];
+            ulrString = [NSString stringWithFormat:@"%@HeartBeatVer=%d&config_id=%d&uuid=%@&devicetoken=%@@&os=iOS&imei=%@&imsi=%@",updatedremoteConfigTestUrl,3,11,uuidIMEI,pushDeviceToken,imei,subscriberID];
         }
     } else if (!(updatedconfigID.length == 0)) {
         int configID = [updatedconfigID intValue];
-        ulrString = [NSString stringWithFormat:@"%@HeartBeatVer=%d&config_id=%d&uuid=%@&devicetoken=%@",hearBeatAPIURL,1,configID,uuidIMEI,pushDeviceToken];
+        ulrString = [NSString stringWithFormat:@"%@HeartBeatVer=%d&config_id=%d&uuid=%@&devicetoken=%@@&os=iOS&imei=%@&imsi=%@",hearBeatAPIURL,3,configID,uuidIMEI,pushDeviceToken,imei,subscriberID];
     } else {
-        ulrString = [NSString stringWithFormat:@"%@HeartBeatVer=%d&config_id=%d&uuid=%@&devicetoken=%@",hearBeatAPIURL,1,11,uuidIMEI,pushDeviceToken];
+        ulrString = [NSString stringWithFormat:@"%@HeartBeatVer=%d&config_id=%d&uuid=%@&devicetoken=%@@&os=iOS&imei=%@&imsi=%@",hearBeatAPIURL,3,11,uuidIMEI,pushDeviceToken,imei,subscriberID];
     }
     [ConnectionManager callGetMethod:ulrString completionBlock:^(BOOL succeeded, id responseData, NSString *errorMsg) {
         if (succeeded) {
